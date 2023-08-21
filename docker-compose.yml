@@ -1,19 +1,20 @@
-version: "3"
+version: "2"
 
 services:
   sonarqube:
-    image: sonarqube
-    #expose:
-    #  - 9000
+    image: sonarqube:9.2.4-community
     ports:
-      - "80:9000"
+      - "9010:9000"
     networks:
       - sonarnet
     environment:
-      - sonar.jdbc.url=jdbc:postgresql://db/sonar
-      - sonar.jdbc.username=sonar
-      - sonar.jdbc.password=sonar1234
-      - sonar.search.javaAdditionalOpts=-Dbootstrap.system_call_filter=false
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://db:5432/sonarq
+      - SONARQUBE_JDBC_USERNAME=sonarq
+      - SONARQUBE_JDBC_PASSWORD=sonar12345
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    privileged: true
+    depends_on:
+      - db
     volumes:
       - sonarqube_conf:/opt/sonarqube/conf
       - sonarqube_data:/opt/sonarqube/data
@@ -21,14 +22,14 @@ services:
       - sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
 
   db:
-    image: postgres
+    image: postgres:14
     ports:
       - "5432:5432"
     networks:
       - sonarnet
     environment:
-      - POSTGRES_USER=sonar
-      - POSTGRES_PASSWORD=sonar1234
+      - POSTGRES_USER=sonarq
+      - POSTGRES_PASSWORD=sonar12345
     volumes:
       - postgresql:/var/lib/postgresql
       - postgresql_data:/var/lib/postgresql/data
